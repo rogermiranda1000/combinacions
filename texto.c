@@ -84,6 +84,7 @@ char combToChar(unsigned char c) {
     return retorno;
 }
 
+// decodifica
 void textToString(unsigned char *text, char *string) {
     int x, size = strlen(text);
 
@@ -96,21 +97,21 @@ void textToString(unsigned char *text, char *string) {
     return;
 }
 
-// reserva la memoria y retorna su puntero
-unsigned char* allocateTextMemory(char *txt) {
-    unsigned char *retorno = NULL;
-    unsigned char tmp;
-    unsigned int memory = strlen(txt), x;
+int getMemory(char *txt) {
+    int memory = strlen(txt);
 
-    // esta función está montada de forma que cada caracter ocupa medio byte
-    // si los caracteres son impares, medio byte queda bacio
-    // + el \0 final
     if (memory % 2 == 1) {
         memory++;
     }
     memory /= 2;
 
-    retorno = (unsigned char*) malloc(sizeof(unsigned char) * (memory+1));
+    return memory;
+}
+
+// codifica
+void stringToText(char *txt, unsigned char *retorno) {
+    int x, memory = getMemory(txt);
+    unsigned char tmp;
 
     for (x = 0; x < memory; x++) {
         tmp = charToComb(txt[2*x]);
@@ -119,6 +120,18 @@ unsigned char* allocateTextMemory(char *txt) {
         retorno[x] = tmp;
     }
     retorno[memory] = '\0';
+
+    return;
+}
+
+// reserva la memoria y retorna su puntero
+// esta función está montada de forma que cada caracter ocupa medio byte
+// si los caracteres son impares, medio byte queda bacio
+// + el \0 final
+unsigned char* allocateTextMemory(char *txt) {
+    unsigned char *retorno = (unsigned char*) malloc(sizeof(unsigned char) * (getMemory(txt)+1));
+
+    stringToText(txt, retorno);
 
     return retorno;
 }
