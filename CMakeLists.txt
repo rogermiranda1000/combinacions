@@ -3,4 +3,4 @@ project(combinacions C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(combinacions main.c main.h texto.c texto.h combi.h combi.c combinatoria.c combinatoria.h)
+add_executable(combinacions main.c main.h texto.c texto.h lista.h lista.c combinatoria.c combinatoria.h estructuras.h paraleling.c paraleling.h)

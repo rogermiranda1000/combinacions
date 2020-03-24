@@ -3,10 +3,20 @@
 
 #include <stdio.h>
 #include "texto.h"
-#include "combi.h"
+#include "lista.h"
+#include "combinatoria.h"
 #include <stdlib.h>
+#include <time.h>
+#include "paraleling.h"
 
 #define AUX_STR 80
+
+#define NUMERO_UTILITZAR 3
+#define VEGADES_UTILITZAR 7
+#define RESULTAT 2019
+
+#define VERBOSE 1
+#define THREADS 16
 
 typedef char String[AUX_STR];
 

@@ -2,43 +2,38 @@
 
 // ./combinacions número_a_utilitzar vegades_a_utilitzar_el_número resultat
 int main(int argc, char **argw) {
-    String s;
-    int numero_a_utilitzar, vegades_a_utilitzar_el_numero, resultat;
+    Combinaciones *combinaciones = addCombiT(NULL, 0);
+    unsigned long current = 1, last = 0, end = 0, x;
+    int counter = 0;
+    bool found = false;
+    clock_t start = (float)clock();
 
-    // tests
-    char *comprimir = "(x+x)/x!*(x^(x-x))", *comprimir2 = "x!";
-    unsigned char *var1, *var2, *add;
+    combinaciones->valor.resultado = (float)NUMERO_UTILITZAR;
+    combinaciones->valor.operacion = allocateTextMemory("x");
 
-    var1 = allocateTextMemory(comprimir);
-    var2 = allocateTextMemory(comprimir2);
-    textToString(var1, s);
-    printf("%s > %s\n", comprimir, s);
-    printf("%d bytes reservados, frente a %d\n", strlen(var1)+1, strlen(comprimir)+1);
-    printf("%d veces el numero\n", getVecesUsado(var1));
-    add = concatenateString(var1, var2, '+');
-    textToString(add, s);
-    printf("%s\n", s);
+    while (!found) {
+        if (VERBOSE) printf("\n[v] Ciclo %d (%ld iteraciones)", ++counter, end - last + 1);
 
-    free(add);
-    free(var1);
-    free(var2);
-
-
-
-    if (argc != 4) {
-        printf("[e] Debes especificar 3 parametros [numero_a_utilitzar vegades_a_utilitzar_el_numero resultat]\n");
-    }
-    else {
-        numero_a_utilitzar = atoi(argw[1]);
-        vegades_a_utilitzar_el_numero = atoi(argw[2]);
-        resultat = atoi(argw[3]);
-        if ((numero_a_utilitzar == 0 && argw[1][0] != '0') || (vegades_a_utilitzar_el_numero == 0 && argw[2][0] != '0') || (resultat == 0 && argw[3][0] != '0')) {
-            printf("[e] Uno o mas parametros no son enteros.\n");
+        for (x = last; x <= end && !found; x++) {
+            //printf("\n[d] %lu\n", end - x + 1);
+            if ((end - x + 1) % 50 == 0 && VERBOSE) printf(".");
+            found = combine(combinaciones, x, end, &current);
         }
-        else {
-
-        }
+        last = end + 1;
+        end = current - 1;
     }
+
+
+    //operacions(combinaciones, combinaciones->valor, combinaciones->valor, &current);
+
+    if (VERBOSE) {
+        printf("[v] %lu combinaciones creadas\n", current);
+        printf("[v] Tiempo de ejecucion: %.2f\n", ((float)clock() - start)/CLOCKS_PER_SEC);
+    }
+    //printComb(combinaciones, current);
+
+    freeCombiF(combinaciones, current);
 
     return 0;
 }
+

@@ -12,22 +12,22 @@ unsigned char charToComb(char c) {
         case 'x':
             retorno =  1;
             break;
-        case '+':
+        case SUMA:
             retorno =  2;
             break;
-        case '-':
+        case RESTA:
             retorno = 3;
             break;
-        case '*':
+        case MULTIPLICACION:
             retorno = 4;
             break;
-        case '/':
+        case DIVISION:
             retorno = 5;
             break;
-        case '^':
+        case EXPONENTE:
             retorno = 6;
             break;
-        case '!':
+        case FACTORIAL:
             retorno = 7;
             break;
         case '(':
@@ -54,22 +54,22 @@ char combToChar(unsigned char c) {
             retorno =  'x';
             break;
         case 2:
-            retorno =  '+';
+            retorno =  SUMA;
             break;
         case 3:
-            retorno = '-';
+            retorno = RESTA;
             break;
         case 4:
-            retorno = '*';
+            retorno = MULTIPLICACION;
             break;
         case 5:
-            retorno = '/';
+            retorno = DIVISION;
             break;
         case 6:
-            retorno = '^';
+            retorno = EXPONENTE;
             break;
         case 7:
-            retorno = '!';
+            retorno = FACTORIAL;
             break;
         case 8:
             retorno = '(';
@@ -85,7 +85,7 @@ char combToChar(unsigned char c) {
 }
 
 // decodifica
-void textToString(unsigned char *text, char *string) {
+void encryptedToString(Encrypted text, char *string) {
     int x, size = strlen(text);
 
     for (x = 0; x < size; x++) {
@@ -109,7 +109,7 @@ int getMemory(char *txt) {
 }
 
 // codifica
-void stringToText(char *txt, unsigned char *retorno) {
+void stringToEncrypted(char *txt, Encrypted retorno) {
     int x, memory = getMemory(txt);
     unsigned char tmp;
 
@@ -128,10 +128,15 @@ void stringToText(char *txt, unsigned char *retorno) {
 // esta función está montada de forma que cada caracter ocupa medio byte
 // si los caracteres son impares, medio byte queda bacio
 // + el \0 final
-unsigned char* allocateTextMemory(char *txt) {
-    unsigned char *retorno = (unsigned char*) malloc(sizeof(unsigned char) * (getMemory(txt)+1));
+Encrypted allocateTextMemory(char *txt) {
+    Encrypted retorno = (unsigned char*) malloc(sizeof(unsigned char) * (getMemory(txt)+1));
 
-    stringToText(txt, retorno);
+    if (retorno == NULL) {
+        printf("[e] Not enought memory.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    stringToEncrypted(txt, retorno);
 
     return retorno;
 }
