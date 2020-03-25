@@ -16,7 +16,6 @@
 #define RESULTAT 2019
 
 #define VERBOSE 1
-#define THREADS 16
 
 typedef char String[AUX_STR];
 

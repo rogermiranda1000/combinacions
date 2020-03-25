@@ -40,7 +40,7 @@ void printComb(Combinaciones *c, unsigned long current) {
         printf("%lu. ", x+1);
         if(tmp != NULL) {
             encryptedToString(tmp->valor.operacion, s);
-           printf("%s [%.2f]\n", s, tmp->valor.resultado);
+            printf("%s [%.2f]\n", s, tmp->valor.resultado);
         }
         else {
             printf("ERROR\n");
@@ -50,7 +50,11 @@ void printComb(Combinaciones *c, unsigned long current) {
     return;
 }
 
-Combinaciones* addCombiT(Combinaciones *c, unsigned long index) {
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+Combinaciones* addCombiT(Combinaciones *c, unsigned long *index) {
+    unsigned long my;
+    clock_t start;
     Combinaciones *retorno = (Combinaciones*)malloc(sizeof(Combinaciones) * 1), *back;
 
     if (retorno == NULL) {
@@ -61,10 +65,29 @@ Combinaciones* addCombiT(Combinaciones *c, unsigned long index) {
     retorno->UP = NULL;
     retorno->DOWN = NULL;
 
-    if (index != 0) {
-        back = getCombi(c, index-1);
+    // asegurar que current se asigna correctamente
+    pthread_mutex_lock(&mutex);
+    my = (*index)++; // reserva el espacio
+
+    if (my != 0) {
+        //printf("[v] Reservando %lu...\n", my - 1);
+        // si no existe, sigue intentandolo
+        back = getCombi(c, my - 1);
+        pthread_mutex_unlock(&mutex);
+        if (back == NULL) {
+            //start = (float)clock();
+            printf("\n[e] Combination (%lu) not found, trying again...\n", my-1);
+            while (back == NULL) {
+                //if (((float)clock()-start)/CLOCKS_PER_SEC == 0.5) printf("\n[e] Combination (%lu) not found, try again...\n", my-1);
+                back = getCombi(c, my - 1);
+            }
+            printf("\n[e] %lu found!\n", my-1);
+        }
         retorno->DOWN = back;
         back->UP = retorno;
+    }
+    else {
+        pthread_mutex_unlock(&mutex);
     }
 
     return retorno;
@@ -72,8 +95,9 @@ Combinaciones* addCombiT(Combinaciones *c, unsigned long index) {
 
 Combinaciones* addCombi(Combinaciones *c) {
     Combinaciones *retorno;
+    unsigned long index = getMaxIndex(c);
 
-    retorno = addCombiT(c, getMaxIndex(c));
+    retorno = addCombiT(c, &index);
 
     return retorno;
 }
@@ -125,8 +149,9 @@ Encrypted concatenateString(Encrypted comb1, Encrypted comb2, char operacion) {
     int size;
     Encrypted retorno;
 
+    strcpy(s, "");
     if (*comb1 != '\0') {
-        strcpy(s, "(");
+        strcat(s, "(");
 
         encryptedToString(comb1, tmp);
         strcat(s, tmp);
