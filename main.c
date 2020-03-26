@@ -18,8 +18,8 @@ int main(int argc, char **argw) {
         //printf("[d] End: %lu, last: %lu\n", end, last);
 
         // multi-processor
-        found = processParalel(combinaciones, last, end, &current);
-        //found = processParalelNEW(combinaciones, last, end, &current);
+        //found = processParalel(combinaciones, last, end, &current);
+        found = processParalelNEW(combinaciones, last, end, &current);
 
         // single CPU
         /*for (x = last; x <= end && !found; x++) {

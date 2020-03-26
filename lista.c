@@ -73,22 +73,19 @@ Combinaciones* addCombiT(Combinaciones *c, unsigned long *index) {
         //printf("[v] Reservando %lu...\n", my - 1);
         // si no existe, sigue intentandolo
         back = getCombi(c, my - 1);
-        pthread_mutex_unlock(&mutex);
         if (back == NULL) {
-            //start = (float)clock();
-            printf("\n[e] Combination (%lu) not found, trying again...\n", my-1);
+            start = (float)clock();
+            //printf("\n[e] Combination (%lu) not found, trying again...\n", my-1);
             while (back == NULL) {
-                //if (((float)clock()-start)/CLOCKS_PER_SEC == 0.5) printf("\n[e] Combination (%lu) not found, try again...\n", my-1);
+                if (((float)clock()-start)/CLOCKS_PER_SEC == 0.5) printf("\n[e] Combination (%lu) not found, try again...\n", my-1);
                 back = getCombi(c, my - 1);
             }
-            printf("\n[e] %lu found!\n", my-1);
+            //printf("\n[e] %lu found!\n", my-1);
         }
         retorno->DOWN = back;
         back->UP = retorno;
     }
-    else {
-        pthread_mutex_unlock(&mutex);
-    }
+    pthread_mutex_unlock(&mutex);
 
     return retorno;
 }
@@ -119,7 +116,8 @@ void freeCombiF(Combinaciones *c, unsigned long size) {
     unsigned long x;
     Combinaciones *current, *go = c;
 
-    for (x = 0; x < size && go != NULL; x++) {
+    for (x = 0; x < size; x++) {
+        while (go == NULL);
         current = go;
         go = go->UP;
 
@@ -151,12 +149,13 @@ Encrypted concatenateString(Encrypted comb1, Encrypted comb2, char operacion) {
 
     strcpy(s, "");
     if (*comb1 != '\0') {
-        strcat(s, "(");
-
         encryptedToString(comb1, tmp);
+
+        if (strcmp(tmp, "x") != 0) strcat(s, "(");
+
         strcat(s, tmp);
 
-        strcat(s, ")");
+        if (strcmp(tmp, "x") != 0) strcat(s, ")");
     }
 
     size = strlen(s);
@@ -164,12 +163,13 @@ Encrypted concatenateString(Encrypted comb1, Encrypted comb2, char operacion) {
     s[size+1] = '\0';
 
     if (*comb2 != '\0') {
-        strcat(s, "(");
-
         encryptedToString(comb2, tmp);
+
+        if (strcmp(tmp, "x") != 0) strcat(s, "(");
+
         strcat(s, tmp);
 
-        strcat(s, ")");
+        if (strcmp(tmp, "x") != 0) strcat(s, ")");
     }
 
     //printf("[d] %s\n", s);

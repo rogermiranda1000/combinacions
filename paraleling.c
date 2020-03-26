@@ -39,7 +39,6 @@ void *execParalel(void *input) {
     return (void*) found;
 }
 
-// el 'x++' del primer bucle está mal
 bool processParalel(Combinaciones *combinaciones, unsigned long last, unsigned long end, unsigned long *current) {
     unsigned long x, d;
     int tmp, thread;
@@ -55,7 +54,7 @@ bool processParalel(Combinaciones *combinaciones, unsigned long last, unsigned l
 
         // start threads
         for(thread = 0; thread < THREADS && x <= end; thread++, x++) {
-            if (x != 0 && x % 25000 == 0) printf(".");
+            //if (x != 0 && x % 25000 == 0) printf(".");
 
             // init
             ps_send[thread].combinaciones = combinaciones;
@@ -82,7 +81,8 @@ bool processParalel(Combinaciones *combinaciones, unsigned long last, unsigned l
                 tmp--;
             }
         }
-        //printf("\n[v] Tiempo de ejecucion medio: %.2fs\n", (((float)clock() - start)/CLOCKS_PER_SEC)/THREADS);
+
+        printf("\n[v] Tiempo de ejecucion medio: %.2fs\n", (((float)clock() - start)/CLOCKS_PER_SEC)/THREADS);
     }
 
     return retorno;
@@ -95,10 +95,13 @@ bool processParalelNEW(Combinaciones *combinaciones, unsigned long last, unsigne
     void *status;
     pthread_t threads[THREADS];
     ParalelStruct ps_send[THREADS];
+    clock_t start;
 
     x = last;
     while (x <= end && !retorno) {
-        for(thread = 0; thread < THREADS && x <= end; thread++, x++) {
+        start = (float)clock();
+
+        for(thread = 0; thread < THREADS && x <= end && !retorno; thread++, x++) {
             if (!first) {
                 if (!pthread_join(threads[thread], &status)) {
                     if ((bool)status) {
@@ -126,6 +129,7 @@ bool processParalelNEW(Combinaciones *combinaciones, unsigned long last, unsigne
         }
 
         first = false;
+        printf("\n[v] Tiempo de ejecucion medio: %.2fs\n", (((float)clock() - start)/CLOCKS_PER_SEC)/THREADS);
     }
 
     return retorno;

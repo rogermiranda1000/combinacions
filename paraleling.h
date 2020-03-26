@@ -8,7 +8,7 @@
 #include "combinatoria.h"
 #include "main.h"
 
-#define THREADS 6
+#define THREADS 4
 
 typedef struct {
     Combinaciones *combinaciones;

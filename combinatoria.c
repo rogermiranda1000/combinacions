@@ -69,6 +69,7 @@ bool operar(Combinaciones *total, Combinacion c1, Combinacion c2, char op, unsig
             break;
         default:
             printf("[e] Operacion no definida\n");
+            error = true;
     }
 
     if (!error) {
@@ -168,7 +169,7 @@ bool operacions(Combinaciones *total, Combinacion c1, Combinacion c2, unsigned l
     bool retorno = false;
     Combinacion nulo;
     nulo.resultado = 0;
-    nulo.operacion = (char*)malloc(sizeof(char) * 1);
+    nulo.operacion = (Encrypted)malloc(sizeof(unsigned char) * 1);
     *nulo.operacion = '\0';
 
     if (getVecesUsado(c1.operacion) + getVecesUsado(c2.operacion) <= VEGADES_UTILITZAR) {
