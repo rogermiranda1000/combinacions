@@ -7,11 +7,13 @@
 #include <stdio.h>
 #include "combinatoria.h"
 #include "main.h"
+#include <unistd.h>
 
-#define THREADS 4
+#define THREADS 6
 
 typedef struct {
-    Combinaciones *combinaciones;
+    Combinaciones *combinaciones_start;
+    Combinaciones **combinaciones_end;
     unsigned long x;
     unsigned long end;
     unsigned long *current;
@@ -21,8 +23,9 @@ void paralel();
 void *myFun(void *x);
 
 void *execParalel(void *input);
-bool processParalel(Combinaciones *combinaciones, unsigned long last, unsigned long end, unsigned long *current);
-bool processParalelNEW(Combinaciones *combinaciones, unsigned long last, unsigned long end, unsigned long *current);
+void *clk(void *x);
+bool processParalel(Combinaciones *combinaciones_start, Combinaciones **combinaciones_end, unsigned long last, unsigned long end, unsigned long *current);
+bool processParalelNEW(Combinaciones *combinaciones_start, Combinaciones **combinaciones_end, unsigned long last, unsigned long end, unsigned long *current);
 
 
 #endif //COMBINACIONS_PARALELING_H

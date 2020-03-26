@@ -52,10 +52,10 @@ void printComb(Combinaciones *c, unsigned long current) {
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-Combinaciones* addCombiT(Combinaciones *c, unsigned long *index) {
+Combinaciones* addCombiT(Combinaciones **combinaciones_end, unsigned long *index) {
     unsigned long my;
     clock_t start;
-    Combinaciones *retorno = (Combinaciones*)malloc(sizeof(Combinaciones) * 1), *back;
+    Combinaciones *retorno = (Combinaciones*)malloc(sizeof(Combinaciones) * 1);
 
     if (retorno == NULL) {
         printf("[e] Not enought memory.\n");
@@ -63,7 +63,7 @@ Combinaciones* addCombiT(Combinaciones *c, unsigned long *index) {
     }
 
     retorno->UP = NULL;
-    retorno->DOWN = NULL;
+    //retorno->DOWN = NULL;
 
     // asegurar que current se asigna correctamente
     pthread_mutex_lock(&mutex);
@@ -72,32 +72,33 @@ Combinaciones* addCombiT(Combinaciones *c, unsigned long *index) {
     if (my != 0) {
         //printf("[v] Reservando %lu...\n", my - 1);
         // si no existe, sigue intentandolo
-        back = getCombi(c, my - 1);
-        if (back == NULL) {
-            start = (float)clock();
-            //printf("\n[e] Combination (%lu) not found, trying again...\n", my-1);
-            while (back == NULL) {
+        if (*combinaciones_end == NULL) {
+            //start = (float)clock();
+            printf("\n[e] Combination (%lu) not found\n", my);
+            exit(EXIT_FAILURE);
+            /*while (back == NULL) {
                 if (((float)clock()-start)/CLOCKS_PER_SEC == 0.5) printf("\n[e] Combination (%lu) not found, try again...\n", my-1);
                 back = getCombi(c, my - 1);
-            }
+            }*/
             //printf("\n[e] %lu found!\n", my-1);
         }
-        retorno->DOWN = back;
-        back->UP = retorno;
+        //retorno->DOWN = back;
+        (*combinaciones_end)->UP = retorno;
+        *combinaciones_end = retorno;
     }
     pthread_mutex_unlock(&mutex);
 
     return retorno;
 }
 
-Combinaciones* addCombi(Combinaciones *c) {
+/*Combinaciones* addCombi(Combinaciones *c) {
     Combinaciones *retorno;
     unsigned long index = getMaxIndex(c);
 
     retorno = addCombiT(c, &index);
 
     return retorno;
-}
+}*/
 
 // obtener el indice máximo + 1 (el número de objetos)
 unsigned long getMaxIndex(Combinaciones *c) {
@@ -112,30 +113,31 @@ unsigned long getMaxIndex(Combinaciones *c) {
     return x;
 }
 
-void freeCombiF(Combinaciones *c, unsigned long size) {
+void freeCombiF(Combinaciones **c, unsigned long size) {
     unsigned long x;
-    Combinaciones *current, *go = c;
+    Combinaciones *current, *go = *c;
 
     for (x = 0; x < size; x++) {
-        while (go == NULL);
+        //while (go == NULL); // wait till all are created
         current = go;
         go = go->UP;
 
         if(current->valor.operacion != NULL) {
             free(current->valor.operacion);
-            current->valor.operacion = NULL;
         }
-        if (current->DOWN != NULL) {
+        free(current);
+        /*if (current->DOWN != NULL) {
             free(current->DOWN);
             current->DOWN = NULL;
-        }
+        }*/
     }
+    *c = NULL;
 
     return;
 }
 
-void freeCombi(Combinaciones *c) {
-    unsigned long x = getMaxIndex(c);
+void freeCombi(Combinaciones **c) {
+    unsigned long x = getMaxIndex(*c);
 
     freeCombiF(c, x);
 

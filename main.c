@@ -4,22 +4,32 @@
 int main(int argc, char **argw) {
     int counter = 0;
     unsigned long current = 0, last = 0, end = 0, x;
-    Combinaciones *combinaciones;
-    bool found = false;
+    Combinaciones *combinaciones_start, *combinaciones_end;
+    bool found = false, clock_created = true;
+    pthread_t clock_thread;
     clock_t start = (float)clock();
 
-    combinaciones = addCombiT(NULL, &current);
-    combinaciones->valor.resultado = (float)NUMERO_UTILITZAR;
-    combinaciones->valor.operacion = allocateTextMemory("x");
+    combinaciones_start = addCombiT(NULL, &current);
+    combinaciones_start->valor.resultado = (float)NUMERO_UTILITZAR;
+    combinaciones_start->valor.operacion = allocateTextMemory("x");
+    combinaciones_end = combinaciones_start;
+
+    /*if(pthread_create(&clock_thread, NULL, &clk, &current)) {
+        printf("[e] Clock thread creation error\n");
+        clock_created = false;
+    }*/
 
     while (!found) {
-        if (VERBOSE) printf("\n[v] Ciclo %d (%ld combinaciones)", ++counter, (end - last + 1)*10*end);
+        if (VERBOSE) {
+            printf("[v] Ciclo %d (%ld combinaciones)\n", ++counter, (end - last + 1)*10*end);
+            if (counter == 4) printf("[w] Este programa pierde mucha eficiencia con el ciclo 4 o superior\n");
+        }
         //printComb(combinaciones, current);
         //printf("[d] End: %lu, last: %lu\n", end, last);
 
         // multi-processor
         //found = processParalel(combinaciones, last, end, &current);
-        found = processParalelNEW(combinaciones, last, end, &current);
+        found = processParalelNEW(combinaciones_start, &combinaciones_end, last, end, &current);
 
         // single CPU
         /*for (x = last; x <= end && !found; x++) {
@@ -34,6 +44,10 @@ int main(int argc, char **argw) {
         end = current - 1;
     }
 
+    /*if (clock_created) {
+        pthread_cancel(start);
+    }*/
+
 
     //operacions(combinaciones, combinaciones->valor, combinaciones->valor, &current);
 
@@ -44,7 +58,7 @@ int main(int argc, char **argw) {
     }
     //printComb(combinaciones, current);
 
-    freeCombiF(combinaciones, current);
+    freeCombiF(&combinaciones_start, current);
 
     return 0;
 }

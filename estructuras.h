@@ -10,7 +10,7 @@ typedef struct {
 } Combinacion;
 
 typedef struct tCombinaciones {
-    struct tCombinaciones *DOWN;
+    //struct tCombinaciones *DOWN;
     Combinacion valor;
     struct tCombinaciones *UP;
 } Combinaciones;

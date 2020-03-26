@@ -13,7 +13,7 @@
 #define EXPONENTE '^'
 #define FACTORIAL '!'
 
-// fichero con todo lo relacionado a engriptación/encriptación
+// fichero con todo lo relacionado a encriptación/desencriptación
 typedef unsigned char *Encrypted;
 
 unsigned char charToComb(char c);

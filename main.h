@@ -11,9 +11,9 @@
 
 #define AUX_STR 80
 
-#define NUMERO_UTILITZAR 3
-#define VEGADES_UTILITZAR 6//7
-#define RESULTAT (6*6*6*6*6)//2019
+#define NUMERO_UTILITZAR 2//3
+#define VEGADES_UTILITZAR 3//7
+#define RESULTAT 8*7*6*5*4*3*2//2019
 
 #define VERBOSE 1
 

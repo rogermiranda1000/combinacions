@@ -4,7 +4,7 @@ float factorial(float val)
 {
     float retorno = 1, tmp;
 
-    if (val < 0 || trunc(val) != val) {
+    if (val < 0 || truncf(val) != val) {
         retorno = -1;
     }
     else {
@@ -21,9 +21,43 @@ float factorial(float val)
     return retorno;
 }
 
+
+// no acepta fracciones
+float exponent(float base, float exp) {
+    float retorno = base, tmp;
+    long x;
+    bool negative = false;
+
+    if (exp == 0) {
+        retorno = 1;
+    }
+    else if (truncf(exp) == exp) {
+        if (exp < 0) {
+            negative = true;
+            exp *= -1;
+        }
+
+        for (x = 1; x < (long)exp && (tmp = retorno * base) / retorno == base; x++) {
+            retorno = tmp;
+        }
+
+        if (x != (long)exp) {
+            retorno = POW_ERROR;
+        }
+        else if (negative) {
+            retorno = 1/retorno;
+        }
+    }
+    else {
+        retorno = POW_ERROR;
+    }
+
+    return retorno;
+}
+
 //pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-bool operar(Combinaciones *total, Combinacion c1, Combinacion c2, char op, unsigned long *current) {
+bool operar(Combinaciones **combinaciones_end, Combinacion c1, Combinacion c2, char op, unsigned long *current) {
     Combinaciones *r;
     String s;
     bool error = false, retorno = false;
@@ -34,10 +68,20 @@ bool operar(Combinaciones *total, Combinacion c1, Combinacion c2, char op, unsig
     //printf("[v] Operacion!\n");
     switch (op) {
         case SUMA:
-            resultado += c2.resultado;
+            if ((tmp = resultado+c2.resultado) - resultado == c2.resultado) {
+                resultado = tmp;
+            }
+            else {
+                error = 1;
+            }
             break;
         case RESTA:
-            resultado -= c2.resultado;
+            if ((tmp = resultado-c2.resultado) + resultado == c2.resultado) {
+                resultado = tmp;
+            }
+            else {
+                error = 1;
+            }
             break;
         case MULTIPLICACION:
             if ((tmp = resultado*c2.resultado) / resultado == c2.resultado)
@@ -48,15 +92,15 @@ bool operar(Combinaciones *total, Combinacion c1, Combinacion c2, char op, unsig
             }
             break;
         case DIVISION:
-            if (c2.resultado != 0) {
-                resultado /= c2.resultado;
+            if (c2.resultado != 0 && (tmp = resultado/c2.resultado) * resultado == c2.resultado) {
+                resultado = tmp;
             } else {
                 error = 1;
             }
             break;
         case EXPONENTE:
-            resultado = (float)pow(resultado, c2.resultado);
-            if (resultado > (float)MAX_FLOAT || resultado < (float)-MAX_FLOAT) {
+            resultado = exponent(resultado, c2.resultado);
+            if (resultado == POW_ERROR) {
                 error = 1;
             }
             break;
@@ -75,7 +119,7 @@ bool operar(Combinaciones *total, Combinacion c1, Combinacion c2, char op, unsig
     if (!error) {
         // asegurar que current se asigna correctamente
         //pthread_mutex_lock(&mutex);
-        r = addCombiT(total, current);
+        r = addCombiT(combinaciones_end, current);
         //pthread_mutex_unlock(&mutex);
 
         if (r == NULL) {
@@ -165,7 +209,7 @@ Combinacion operarNEW(Combinacion c1, Combinacion c2, char op) {
     return retorno;
 }
 
-bool operacions(Combinaciones *total, Combinacion c1, Combinacion c2, unsigned long *current) {
+bool operacions(Combinaciones **combinaciones_end, Combinacion c1, Combinacion c2, unsigned long *current) {
     bool retorno = false;
     Combinacion nulo;
     nulo.resultado = 0;
@@ -173,23 +217,23 @@ bool operacions(Combinaciones *total, Combinacion c1, Combinacion c2, unsigned l
     *nulo.operacion = '\0';
 
     if (getVecesUsado(c1.operacion) + getVecesUsado(c2.operacion) <= VEGADES_UTILITZAR) {
-        retorno = operar(total, c1, c2, SUMA, current); // 0
-        retorno = (!retorno ? operar(total, c1, c2, RESTA, current) : true); // 1
-        retorno = (!retorno ? operar(total, c1, c2, MULTIPLICACION, current) : true); // 2
-        retorno = (!retorno ? operar(total, c1, c2, DIVISION, current) : true); // 3
-        retorno = (!retorno ? operar(total, c1, c2, EXPONENTE, current) : true); // 4
+        retorno = operar(combinaciones_end, c1, c2, SUMA, current); // 0
+        retorno = (!retorno ? operar(combinaciones_end, c1, c2, RESTA, current) : true); // 1
+        retorno = (!retorno ? operar(combinaciones_end, c1, c2, MULTIPLICACION, current) : true); // 2
+        retorno = (!retorno ? operar(combinaciones_end, c1, c2, DIVISION, current) : true); // 3
+        retorno = (!retorno ? operar(combinaciones_end, c1, c2, EXPONENTE, current) : true); // 4
 
         // si c1 no es c2, giralo
         if (strcmp(c1.operacion, c2.operacion) != 0) {
-            retorno = (!retorno ? operar(total, c2, c1, RESTA, current) : true); // 5
-            retorno = (!retorno ? operar(total, c2, c1, DIVISION, current) : true); // 6
-            retorno = (!retorno ? operar(total, c2, c1, EXPONENTE, current) : true); // 7
+            retorno = (!retorno ? operar(combinaciones_end, c2, c1, RESTA, current) : true); // 5
+            retorno = (!retorno ? operar(combinaciones_end, c2, c1, DIVISION, current) : true); // 6
+            retorno = (!retorno ? operar(combinaciones_end, c2, c1, EXPONENTE, current) : true); // 7
         }
     }
 
     // funciones consigo misma
-    retorno = (!retorno ? operar(total, c1, nulo, FACTORIAL, current) : true); // 8
-    retorno = (!retorno ? operar(total, nulo, c1, RESTA, current) : true); // 9
+    retorno = (!retorno ? operar(combinaciones_end, c1, nulo, FACTORIAL, current) : true); // 8
+    retorno = (!retorno ? operar(combinaciones_end, nulo, c1, RESTA, current) : true); // 9
 
     free(nulo.operacion);
     return retorno;
@@ -273,13 +317,17 @@ Storage operacionsNEW(Combinacion c1, Combinacion c2) {
 
 // dado un índice actual y el índice de la última conbinación del anterior ciclo (incluido),
 // se genera su combinación con todas las otras
-bool combine(Combinaciones *total, unsigned long current, unsigned long end, unsigned long *contador) {
+bool combine(Combinaciones *combinaciones_start, Combinaciones **combinaciones_end, unsigned long current, unsigned long end, unsigned long *contador) {
     bool retorno = false;
     unsigned long x;
-    Combinacion this = getCombi(total, current)->valor;
+    Combinacion this = getCombi(combinaciones_start, current)->valor;
+    Combinaciones *now = combinaciones_start;
 
     for (x = 0; x <= end && !retorno; x++) {
-        retorno = operacions(total, this, getCombi(total, x)->valor, contador);
+        retorno = operacions(combinaciones_end, this, now->valor, contador);
+        if (x+1 <= end) {
+            now = combinaciones_start->UP;
+        }
     }
 
     return retorno;
@@ -299,7 +347,7 @@ int countAvailable(Storage s) {
     return count;
 }
 
-bool combineNEW(Combinaciones *total, unsigned long current, unsigned long end, unsigned long *contador) {
+/*bool combineNEW(Combinaciones *total, unsigned long current, unsigned long end, unsigned long *contador) {
     //bool retorno = false;
     Storage s;
     unsigned long x, init;
@@ -337,4 +385,4 @@ bool combineNEW(Combinaciones *total, unsigned long current, unsigned long end, 
     }
 
     return s.found;
-}
+}*/
